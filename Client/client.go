@@ -32,5 +32,5 @@ func main() {
     }
 
     fmt.Println("Received: ", string(buffer[:messageLength]))
-    // defer connection.Close()
+    defer connection.Close()
 }
