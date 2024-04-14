@@ -14,6 +14,13 @@ const (
 )
 
 func main() {
+    if len(os.Args) != 2 {
+        fmt.Println("Usage: go run client.go <name>")
+        os.Exit(1)
+    }
+
+    var name string = os.Args[1]
+
     // establish connection
     connection, err := net.Dial(CLIENT_TYPE, CLIENT_HOST+":"+CLIENT_PORT)
 
@@ -23,7 +30,7 @@ func main() {
     }
 
     // send message
-    _, err = connection.Write([]byte("Hello from client"))
+    _, err = connection.Write([]byte("Hello from " + name))
     buffer := make([]byte, 1024)
     messageLength, err := connection.Read(buffer)
     if err != nil {
