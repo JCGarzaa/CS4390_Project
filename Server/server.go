@@ -32,7 +32,7 @@ func main() {
         }
 
         fmt.Println("Connection accepted from " + connection.RemoteAddr().String())
-        _, err = connection.Write([]byte("Welcome to the Basic Math Server. To exit, type 'exit'"))
+        _, err = connection.Write([]byte("Welcome to the Basic Math Server. To exit, type 'exit'\n"))
         if err != nil {
             fmt.Println("Error Writing initial welcome to client:", err)
             os.Exit(1)
@@ -40,22 +40,22 @@ func main() {
         go processClient(connection)
     }
 }
-func processInitialConnection(connection net.Conn) {
-    _, err := connection.Write([]byte("Welcome to the Basic Math Server. To exit, type 'exit'"))
-    if err != nil {
-        fmt.Println("Error Writing initial welcome to client:", err)
-        os.Exit(1)
-    }
-}
 
 func processClient(connection net.Conn) {
-    buffer := make([]byte, 1024)
-    messageLength, err := connection.Read(buffer)
-    if err != nil {
-        fmt.Println("Error reading from client:", err)
-        os.Exit(1)
+    for {
+        buffer := make([]byte, 1024)
+        messageLength, err := connection.Read(buffer)
+        if err != nil {
+            fmt.Println("Error reading from client:", err)
+            os.Exit(1)
+        }
+        fmt.Println("Received from client: ", string(buffer[:messageLength]))
+        if string(buffer[:messageLength]) == "exit\n" {
+            connection.Close()
+            fmt.Println("Client disconnected")
+            return
+        }
+        fmt.Println("Sending response to client: " + string(buffer[:messageLength]))
+        _, err = connection.Write([]byte(string(buffer[:messageLength]))) 
     }
-    fmt.Println("Received: ", string(buffer[:messageLength]))
-    _, err = connection.Write([]byte("Thanks! Received message: " + string(buffer[:messageLength])))
-    connection.Close()
 }

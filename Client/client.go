@@ -1,4 +1,3 @@
-// client
 package main
 
 import (
@@ -31,7 +30,6 @@ func main() {
     }
 
     fmt.Println("Connected to server on " + CLIENT_HOST + ":" + CLIENT_PORT)
-    defer connection.Close()
     
     var initialPayload []byte = []byte("Hello from " + name)
 
@@ -51,9 +49,19 @@ func main() {
     reader := bufio.NewReader(os.Stdin)
 
     // create a reader to read responses from the server
-    serverReader := bufio.NewReader(connection)
-
+    // serverReader := bufio.NewReader(connection)
+    defer connection.Close()
     for {
+        // read response from server
+        buffer := make([]byte, 1024)
+        messageLength, err := connection.Read(buffer)
+        if err != nil {
+            fmt.Println("Error reading from server:", err)
+            connection.Close()
+            return
+        }
+        fmt.Println("Server response: ", string(buffer[:messageLength]))
+
         fmt.Print("Enter math expression to send to the server: ")
         expression, err := reader.ReadString('\n')
         if err != nil {
@@ -67,14 +75,5 @@ func main() {
             fmt.Println("Error sending message to server:", err)
             return
         }
-
-        // read response from server
-        // FIX: EOF error currently
-        response, err := serverReader.ReadString('\n')
-        if err != nil {
-            fmt.Println("Error reading from server:", err)
-            return
-        }
-        fmt.Println("Server response: ", response)
     }
 }
