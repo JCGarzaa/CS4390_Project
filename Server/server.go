@@ -49,13 +49,21 @@ func processClient(connection net.Conn) {
             fmt.Println("Error reading from client:", err)
             os.Exit(1)
         }
-        fmt.Println("Received from client: ", string(buffer[:messageLength]))
-        if string(buffer[:messageLength]) == "exit\n" {
+
+        message := string(buffer[:messageLength])
+        fmt.Println("Received from client: ", message) // log the message received from the client
+        if message == "exit\n" {
             connection.Close()
             fmt.Println("Client disconnected")
             return
         }
-        fmt.Println("Sending response to client: " + string(buffer[:messageLength]))
-        _, err = connection.Write([]byte(string(buffer[:messageLength]))) 
+
+        response := solveMathProblem(message) // Calculate the math problem
+        fmt.Println("Sending response to client: " + response) // log the response being sent to the client
+        _, err = connection.Write([]byte(response)) // send the response to the client
     }
+}
+
+func solveMathProblem(problem string) string {
+    return problem + "2222"
 }
