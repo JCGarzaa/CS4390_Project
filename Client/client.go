@@ -5,6 +5,7 @@ import (
     "fmt"
     "net"
     "os"
+    "bufio"
 )
 
 const (
@@ -29,8 +30,13 @@ func main() {
         os.Exit(1)
     }
 
+    fmt.Println("Connected to server on " + CLIENT_HOST + ":" + CLIENT_PORT)
+    defer connection.Close()
+    
+    var initialPayload []byte = []byte("Hello from " + name)
+
     // send message
-    _, err = connection.Write([]byte("Hello from " + name))
+    _, err = connection.Write(initialPayload)
     buffer := make([]byte, 1024)
     messageLength, err := connection.Read(buffer)
     if err != nil {
@@ -39,5 +45,36 @@ func main() {
     }
 
     fmt.Println("Received: ", string(buffer[:messageLength]))
-    defer connection.Close()
+
+
+    // create a reader to read user input
+    reader := bufio.NewReader(os.Stdin)
+
+    // create a reader to read responses from the server
+    serverReader := bufio.NewReader(connection)
+
+    for {
+        fmt.Print("Enter math expression to send to the server: ")
+        expression, err := reader.ReadString('\n')
+        if err != nil {
+            fmt.Println("Error reading from user:", err)
+            return
+        }
+
+        // send message to server
+        _, err = connection.Write([]byte(expression))
+        if err != nil {
+            fmt.Println("Error sending message to server:", err)
+            return
+        }
+
+        // read response from server
+        // FIX: EOF error currently
+        response, err := serverReader.ReadString('\n')
+        if err != nil {
+            fmt.Println("Error reading from server:", err)
+            return
+        }
+        fmt.Println("Server response: ", response)
+    }
 }

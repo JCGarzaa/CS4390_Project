@@ -32,7 +32,19 @@ func main() {
         }
 
         fmt.Println("Connection accepted from " + connection.RemoteAddr().String())
+        _, err = connection.Write([]byte("Welcome to the Basic Math Server. To exit, type 'exit'"))
+        if err != nil {
+            fmt.Println("Error Writing initial welcome to client:", err)
+            os.Exit(1)
+        }
         go processClient(connection)
+    }
+}
+func processInitialConnection(connection net.Conn) {
+    _, err := connection.Write([]byte("Welcome to the Basic Math Server. To exit, type 'exit'"))
+    if err != nil {
+        fmt.Println("Error Writing initial welcome to client:", err)
+        os.Exit(1)
     }
 }
 
