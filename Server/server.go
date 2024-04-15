@@ -65,5 +65,6 @@ func processClient(connection net.Conn) {
 }
 
 func solveMathProblem(problem string) string {
+    // TODO: Implement math problem solving logic
     return problem + "2222"
 }
