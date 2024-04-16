@@ -5,6 +5,7 @@ import (
     "net"
     "os"
     "bufio"
+    "strings"
 )
 
 const (
@@ -42,7 +43,7 @@ func main() {
         os.Exit(1)
     }
 
-    fmt.Println("Received: ", string(buffer[:messageLength]))
+    fmt.Println("Received:", string(buffer[:messageLength]))
 
 
     // create a reader to read user input
@@ -60,10 +61,12 @@ func main() {
             connection.Close()
             return
         }
-        fmt.Println("Server response: ", string(buffer[:messageLength]))
+        fmt.Println("Server response:", string(buffer[:messageLength]))
 
         fmt.Print("Enter math expression to send to the server: ")
         expression, err := reader.ReadString('\n')
+        expression = strings.TrimSpace(expression)
+        fmt.Println("Sending expression to server:", expression)
         if err != nil {
             fmt.Println("Error reading from user:", err)
             return

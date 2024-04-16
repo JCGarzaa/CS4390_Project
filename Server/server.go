@@ -2,9 +2,11 @@
 package main
 
 import (
-    "fmt"
-    "net"
-    "os"
+	"fmt"
+	"net"
+	"os"
+	"os/exec"
+	"strings"
 )
 
 const (
@@ -42,6 +44,7 @@ func main() {
 }
 
 func processClient(connection net.Conn) {
+    var i int = 0
     for {
         buffer := make([]byte, 1024)
         messageLength, err := connection.Read(buffer)
@@ -50,21 +53,32 @@ func processClient(connection net.Conn) {
             os.Exit(1)
         }
 
-        message := string(buffer[:messageLength])
-        fmt.Println("Received from client: ", message) // log the message received from the client
-        if message == "exit\n" {
+        message := strings.TrimSpace(string(buffer[:messageLength])) // trim the message of leading and trailing whitespaces
+        fmt.Println("Received from " + connection.RemoteAddr().String() + ": " + message + "|") // log the message received from the client
+        if message == "exit" {
+            fmt.Println("Client requested to close the connection. Closing connection...")
             connection.Close()
             fmt.Println("Client disconnected")
             return
         }
 
-        response := solveMathProblem(message) // Calculate the math problem
-        fmt.Println("Sending response to client: " + response) // log the response being sent to the client
-        _, err = connection.Write([]byte(response)) // send the response to the client
+        if i > 0 {
+            response := solveMathProblem(message) // Calculate the math problem
+            fmt.Println("Sending response to " + connection.RemoteAddr().String() + ": " + response) // log the response being sent to the client
+            _, err = connection.Write([]byte(response)) // send the response to the client
+        } else {
+            _, err = connection.Write([]byte(message))
+        }
+        i++
     }
 }
 
 func solveMathProblem(problem string) string {
     // TODO: Implement math problem solving logic
-    return problem + "2222"
+    out, err := exec.Command("python", "Server/eval.py", problem).Output()
+    if err != nil {
+        fmt.Println("Error running eval.py:", err)
+        return "Error solving math problem. Please try again"
+    }
+    return string(out)
 }
