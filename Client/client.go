@@ -62,7 +62,6 @@ func main() {
 
         fmt.Print("Enter math expression to send to the server: ")
         expression, err := reader.ReadString('\n')
-        fmt.Println("Sending expression to server:", expression)
         if err != nil {
             fmt.Println("Error reading from user:", err)
             return
