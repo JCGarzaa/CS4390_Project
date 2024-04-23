@@ -1,4 +1,4 @@
-**/*
+/bin
 !**/*.go
 !**/*.py
 !.gitignore
